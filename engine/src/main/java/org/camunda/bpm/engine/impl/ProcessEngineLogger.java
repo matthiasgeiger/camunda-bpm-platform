@@ -17,6 +17,7 @@ import java.net.URL;
 import org.camunda.bpm.application.impl.ProcessApplicationLogger;
 import org.camunda.bpm.container.impl.ContainerIntegrationLogger;
 import org.camunda.bpm.engine.impl.bpmn.behavior.BpmnBehaviorLogger;
+import org.camunda.bpm.engine.impl.bpmn.deployer.BpmnSpectorLogger;
 import org.camunda.bpm.engine.impl.bpmn.diagram.DiagramCanvasLogger;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseLogger;
 import org.camunda.bpm.engine.impl.cfg.ConfigurationLogger;
@@ -51,6 +52,9 @@ public class ProcessEngineLogger extends BaseLogger {
 
   public static final BpmnParseLogger BPMN_PARSE_LOGGER = BaseLogger.createLogger(
       BpmnParseLogger.class, PROJECT_CODE, "org.camunda.bpm.engine.bpmn.parser", "01");
+
+  public static final BpmnSpectorLogger BPMN_SPECTOR_LOGGER = BaseLogger.createLogger(
+          BpmnSpectorLogger.class, PROJECT_CODE, "org.camunda.bpm.engine.bpmn.deployer", "01");
 
   public static final BpmnBehaviorLogger BPMN_BEHAVIOR_LOGGER = BaseLogger.createLogger(
       BpmnBehaviorLogger.class, PROJECT_CODE, "org.camunda.bpm.engine.bpmn.behavior", "02");
