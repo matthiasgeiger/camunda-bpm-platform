@@ -169,6 +169,10 @@ public class Parse extends DefaultHandler {
     warnings.add(new Problem(errorMessage, name, element));
   }
 
+  public void addWarning(String errorMessage, String resourceName, int line, int column) {
+    warnings.add(new Problem(errorMessage, resourceName, line, column));
+  }
+
   public boolean hasWarnings() {
     return warnings != null && !warnings.isEmpty();
   }

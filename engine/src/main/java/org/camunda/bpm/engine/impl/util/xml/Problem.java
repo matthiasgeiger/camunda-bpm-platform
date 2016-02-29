@@ -53,6 +53,13 @@ public class Problem {
     }
   }
 
+  public Problem(String errorMessage, String resourceName, int line, int column) {
+    this.errorMessage = errorMessage;
+    this.resource = resourceName;
+    this.line = line;
+    this.column = column;
+  }
+
   protected void concatenateErrorMessages(Throwable throwable) {
     while (throwable != null) {
       if (errorMessage == null) {
