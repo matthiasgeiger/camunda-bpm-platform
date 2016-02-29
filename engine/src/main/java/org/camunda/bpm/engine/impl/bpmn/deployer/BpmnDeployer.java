@@ -74,6 +74,8 @@ public class BpmnDeployer extends AbstractDefinitionDeployer<ProcessDefinitionEn
 
   public static BpmnParseLogger LOG = ProcessEngineLogger.BPMN_PARSE_LOGGER;
 
+  public static BpmnSpectorLogger LOG_SPECTOR = ProcessEngineLogger.BPMN_SPECTOR_LOGGER;
+
   public static final String[] BPMN_RESOURCE_SUFFIXES = new String[] { "bpmn20.xml", "bpmn" };
 
   protected ExpressionManager expressionManager;
@@ -105,6 +107,7 @@ public class BpmnDeployer extends AbstractDefinitionDeployer<ProcessDefinitionEn
 
     // Perform BPMNspector checks
     try {
+      LOG_SPECTOR.startingEvaluation(resource.getName());
       BPMNspector bpmnSpector = new BPMNspector();
       ValidationResult result = bpmnSpector.validate(new ByteArrayInputStream(bytes), resource.getName());
       if (!result.isValid()) {
@@ -114,8 +117,11 @@ public class BpmnDeployer extends AbstractDefinitionDeployer<ProcessDefinitionEn
                   violation.getLocation().getLocation().getColumn());
         }
         bpmnParse.logWarnings();
+      } else {
+        LOG_SPECTOR.finishedWithNoViolation(resource.getName());
       }
     } catch (ValidationException e) {
+      LOG_SPECTOR.logValidationException(e);
     }
 
     jobDeclarations.putAll(bpmnParse.getJobDeclarations());
