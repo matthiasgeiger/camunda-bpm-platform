@@ -204,6 +204,12 @@
       <artifactId>jul-to-slf4j</artifactId>
       <scope>test</scope>
    </dependency>
+  <!-- Addition of BPMNspector -->
+    <dependency>
+      <groupId>de.uniba.dsg</groupId>
+      <artifactId>bpmnspector</artifactId>
+      <version>1.1.0-alpha</version>
+    </dependency>
 
   </dependencies>
 
