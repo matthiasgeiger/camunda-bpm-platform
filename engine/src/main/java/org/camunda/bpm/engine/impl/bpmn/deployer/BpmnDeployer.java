@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import api.ValidationException;
+import api.ValidationResult;
+import api.Violation;
+import de.uniba.dsg.bpmnspector.BPMNspector;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.impl.AbstractDefinitionDeployer;
 import org.camunda.bpm.engine.impl.ProcessEngineLogger;
@@ -98,6 +102,21 @@ public class BpmnDeployer extends AbstractDefinitionDeployer<ProcessDefinitionEn
     }
 
     bpmnParse.execute();
+
+    // Perform BPMNspector checks
+    try {
+      BPMNspector bpmnSpector = new BPMNspector();
+      ValidationResult result = bpmnSpector.validate(new ByteArrayInputStream(bytes), resource.getName());
+      if (!result.isValid()) {
+        for (Violation violation : result.getViolations()) {
+          bpmnParse.addWarning("BPMNspector: "+violation.getMessage() + "[Violation of " + violation.getConstraint() + "]",
+                  resource.getName(), violation.getLocation().getLocation().getRow(),
+                  violation.getLocation().getLocation().getColumn());
+        }
+        bpmnParse.logWarnings();
+      }
+    } catch (ValidationException e) {
+    }
 
     jobDeclarations.putAll(bpmnParse.getJobDeclarations());
 
