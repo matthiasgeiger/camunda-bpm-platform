@@ -23,6 +23,7 @@ import api.ValidationException;
 import api.ValidationResult;
 import api.Violation;
 import de.uniba.dsg.bpmnspector.BPMNspector;
+import org.camunda.bpm.engine.ProcessEngineConfiguration;
 import org.camunda.bpm.engine.delegate.Expression;
 import org.camunda.bpm.engine.impl.AbstractDefinitionDeployer;
 import org.camunda.bpm.engine.impl.ProcessEngineLogger;
@@ -31,6 +32,7 @@ import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParse;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParseLogger;
 import org.camunda.bpm.engine.impl.bpmn.parser.BpmnParser;
 import org.camunda.bpm.engine.impl.bpmn.parser.EventSubscriptionDeclaration;
+import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.cmd.DeleteJobsCmd;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.db.entitymanager.DbEntityManager;
@@ -105,23 +107,39 @@ public class BpmnDeployer extends AbstractDefinitionDeployer<ProcessDefinitionEn
 
     bpmnParse.execute();
 
-    // Perform BPMNspector checks
-    try {
-      LOG_SPECTOR.startingEvaluation(resource.getName());
-      BPMNspector bpmnSpector = new BPMNspector();
-      ValidationResult result = bpmnSpector.validate(new ByteArrayInputStream(bytes), resource.getName());
-      if (!result.isValid()) {
-        for (Violation violation : result.getViolations()) {
-          bpmnParse.addWarning("BPMNspector: "+violation.getMessage() + "[Violation of " + violation.getConstraint() + "]",
-                  resource.getName(), violation.getLocation().getLocation().getRow(),
-                  violation.getLocation().getLocation().getColumn());
+    ProcessEngineConfigurationImpl configuration = Context.getProcessEngineConfiguration();
+
+    if (configuration!=null && configuration.isBpmnSpectorEnabled()) {
+      // Perform BPMNspector checks
+      try {
+        LOG_SPECTOR.startingEvaluation(resource.getName());
+        BPMNspector bpmnSpector = new BPMNspector();
+        ValidationResult result = bpmnSpector.validate(new ByteArrayInputStream(bytes), resource.getName());
+        if (!result.isValid()) {
+          for (Violation violation : result.getViolations()) {
+            if (ProcessEngineConfiguration.BPMNSPECTOR_VIOLATION_LEVEL_WARNING.equals(configuration.getBpmnSpectorViolationLevel())) {
+              bpmnParse.addWarning(
+                      "BPMNspector: " + violation.getMessage() + "[Violation of " + violation.getConstraint() + "]",
+                      resource.getName(), violation.getLocation().getLocation().getRow(),
+                      violation.getLocation().getLocation().getColumn());
+            } else {
+              bpmnParse.addError("BPMNspector: " + violation.getMessage() + "[Violation of " + violation.getConstraint() + "]",
+                      resource.getName(), violation.getLocation().getLocation().getRow(),
+                      violation.getLocation().getLocation().getColumn());
+            }
+          }
+          if(bpmnParse.hasWarnings()) {
+            bpmnParse.logWarnings();
+          }
+          if(bpmnParse.hasErrors()) {
+            bpmnParse.throwExceptionForErrors();
+          }
+        } else {
+          LOG_SPECTOR.finishedWithNoViolation(resource.getName());
         }
-        bpmnParse.logWarnings();
-      } else {
-        LOG_SPECTOR.finishedWithNoViolation(resource.getName());
+      } catch (ValidationException e) {
+        LOG_SPECTOR.logValidationException(e);
       }
-    } catch (ValidationException e) {
-      LOG_SPECTOR.logValidationException(e);
     }
 
     jobDeclarations.putAll(bpmnParse.getJobDeclarations());
