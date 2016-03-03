@@ -137,6 +137,17 @@ public abstract class ProcessEngineConfiguration {
    */
   public static final String HISTORY_DEFAULT = HISTORY_AUDIT;
 
+
+  // configuration properties for BPMNspector
+  public static final String BPMNSPECTOR_VIOLATION_LEVEL_WARNING = "warning";
+  public static final String BPMNSPECTOR_VIOLATION_LEVEL_ERROR = "error";
+
+  public static final String BPMNSPECTOR_VIOLATION_LEVEL_DEFAULT = BPMNSPECTOR_VIOLATION_LEVEL_ERROR;
+
+  protected boolean bpmnSpectorEnabled = true;
+  protected String bpmnSpectorViolationLevel = BPMNSPECTOR_VIOLATION_LEVEL_DEFAULT;
+
+
   protected String processEngineName = ProcessEngines.NAME_DEFAULT;
   protected int idBlockSize = 100;
   protected String history = HISTORY_DEFAULT;
@@ -645,4 +656,21 @@ public abstract class ProcessEngineConfiguration {
     this.jobExecutorAcquireByPriority = jobExecutorAcquireByPriority;
   }
 
+  public boolean isBpmnSpectorEnabled() {
+    return bpmnSpectorEnabled;
+  }
+
+  public ProcessEngineConfiguration setBpmnSpectorEnabled(boolean bpmnSpectorEnabled) {
+    this.bpmnSpectorEnabled = bpmnSpectorEnabled;
+    return this;
+  }
+
+  public String getBpmnSpectorViolationLevel() {
+    return bpmnSpectorViolationLevel;
+  }
+
+  public ProcessEngineConfiguration setBpmnSpectorViolationLevel(String bpmnSpectorViolationLevel) {
+    this.bpmnSpectorViolationLevel = bpmnSpectorViolationLevel;
+    return this;
+  }
 }
