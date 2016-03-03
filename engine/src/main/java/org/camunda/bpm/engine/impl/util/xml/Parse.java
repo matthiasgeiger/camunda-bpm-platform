@@ -153,6 +153,10 @@ public class Parse extends DefaultHandler {
     errors.add(new Problem(errorMessage, name, element));
   }
 
+  public void addError(String errorMessage, String resourceName, int line, int column) {
+    errors.add(new Problem(errorMessage, resourceName, line, column));
+  }
+
   public void addError(BpmnParseException e) {
     errors.add(new Problem(e, name));
   }
